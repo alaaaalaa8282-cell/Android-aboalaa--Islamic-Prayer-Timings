@@ -1,109 +1,141 @@
 package com.example.islamicprayertimings
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
+import android.content.Context
 import android.content.Intent
-import android.os.Handler
+import android.content.SharedPreferences
+import android.media.MediaPlayer
+import android.os.Build
 import android.os.IBinder
-import android.os.Looper
 import androidx.core.app.NotificationCompat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
+import kotlin.concurrent.timer
 
 class NextPrayService : Service() {
-  private val channelID = "prayer_channel"
-  private val notificationID = 1
-  private lateinit var notificationManager : NotificationManager
-  private lateinit var notificationBuilder : NotificationCompat.Builder
-  private lateinit var inboxStyle : NotificationCompat.InboxStyle
-  private var prayerTimings : Array<String> = Array<String>(6) {""}
-  private var prayerTimingsInSeconds : IntArray = IntArray(6)
-  private var adhanSound : Boolean? = false
 
-  override fun onBind(intent: Intent?): IBinder? {
-    return null
-  }
-  override fun onCreate() {
-    super.onCreate()
-    // Create notification channel
-    notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-    val channel = NotificationChannel(
-      channelID,
-      "Prayer Notification Channel",
-      NotificationManager.IMPORTANCE_LOW
-    )
-    notificationManager.createNotificationChannel(channel)
+    private var mediaPlayer: MediaPlayer? = null
+    private lateinit var prefs: SharedPreferences
+    private val CHANNEL_ID = "prayer_channel"
+    private val NOTIFICATION_ID = 1
 
-    // Open the app when the user taps the notification
-    val intentOpenApp = Intent(this, MainActivity::class.java)
-    val pendingIntent = PendingIntent.getActivity(
-      this,
-      0,
-      intentOpenApp,
-      PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    )
+    // بيانات المواقيت
+    private var prayerTimings = arrayOf("", "", "", "", "", "")
+    private var prayerTimingsInSeconds = intArrayOf(0, 0, 0, 0, 0, 0)
+    private var isSoundEnabled = true
+    private var is24HourFormat = true
 
-    notificationBuilder = NotificationCompat.Builder(this, channelID)
-      .setOngoing(true)
-      .setSmallIcon(R.mipmap.ic_launcher)
-      .setOnlyAlertOnce(true)
-      .setContentIntent(pendingIntent)
-      .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-      .setWhen(0)
-      .setShowWhen(false)
-  }
-
-  override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-    startForeground(notificationID, notificationBuilder.build())
-
-    prayerTimings = intent?.getStringArrayExtra("PrayerTimings") ?: Array(6) { "--:--" }
-    prayerTimingsInSeconds = intent?.getIntArrayExtra("prayerTimingsInSeconds") ?: IntArray(6)
-    adhanSound = intent?.getBooleanExtra("adhanSound", false) == true
-
-    // Notification inbox
-    inboxStyle = NotificationCompat.InboxStyle()
-    for (i in 0..5) {
-      inboxStyle.addLine("${getString(getPrayerNameResId(i))} : ${prayerTimings[i]}")
+    override fun onCreate() {
+        super.onCreate()
+        createNotificationChannel()
+        prefs = getSharedPreferences("AppSettings", MODE_PRIVATE)
     }
-    notificationBuilder.setStyle(inboxStyle)
 
-    setNext()
-    return START_STICKY
-  }
-
-  private fun updateNotification(s: String?, nextIdx: Int, currentTimerValue: String?) {
-    notificationBuilder.setContentTitle(s + " " + prayerTimings[nextIdx])
-    notificationBuilder.setContentText(getString(R.string.after) + "  " + currentTimerValue)
-    notificationManager.notify(notificationID, notificationBuilder.build())
-  }
-
-  private fun setNext() {
-    val handler = Handler(Looper.getMainLooper())
-    val runnable = object : Runnable {
-      override fun run() {
-        val calendar = Calendar.getInstance()
-        val currSeconds = calendar.get(Calendar.HOUR_OF_DAY) * 3600 +
-                calendar.get(Calendar.MINUTE) * 60 +
-                calendar.get(Calendar.SECOND)
-
-        // Determine the next pray
-        var nextIdx = -1
-        for (i in prayerTimingsInSeconds.indices) {
-          if (prayerTimingsInSeconds[i] > currSeconds) {
-            nextIdx = i
-            break
-          }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // استقبال البيانات من MainActivity
+        if (intent != null) {
+            prayerTimings = intent.getStringArrayExtra("PrayerTimings") ?: prayerTimings
+            prayerTimingsInSeconds = intent.getIntArrayExtra("prayerTimingsInSeconds") ?: prayerTimingsInSeconds
+            isSoundEnabled = intent.getBooleanExtra("adhanSound", true)
         }
 
-        // If no future prayer today, set next as tomorrow's Fajr
-        if (nextIdx == -1) nextIdx = 0
-        var nextVal = prayerTimingsInSeconds[nextIdx]
+        // تشغيل الخدمة في المقدمة (Foreground)
+        startForeground(NOTIFICATION_ID, createNotification("جاري التحديث..."))
 
-        // Adjust for next day if needed
-        var diff = nextVal - currSeconds
-        if (diff < 0) diff += 24 * 3600
+        // بدء عداد الوقت
+        startTimer()
+
+        return START_STICKY
+    }
+
+    private fun startTimer() {        timer("PrayerTimer", false, 0, 1000) {
+            val now = Calendar.getInstance()
+            val currentSeconds = now.get(Calendar.HOUR_OF_DAY) * 3600 + 
+                                 now.get(Calendar.MINUTE) * 60 + 
+                                 now.get(Calendar.SECOND)
+
+            // التحقق من وقت الصلاة
+            for (i in 0 until prayerTimingsInSeconds.size) {
+                if (currentSeconds == prayerTimingsInSeconds[i]) {
+                    runOnUiThread {
+                        val prayerName = getPrayerName(i)
+                        showNotification("$prayerName الآن")
+                        playAdhanSound()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun playAdhanSound() {
+        if (!isSoundEnabled) return
+
+        // قراءة اختيار المؤذن من الإعدادات
+        val selectedMuezzin = prefs.getString("selected_muezzin", "منصور الزهراني")
+        
+        // تحديد الملف الصوتي بناءً على الاختيار
+        val soundResId = when (selectedMuezzin) {
+            "محمد رفعت" -> R.raw.adhan_mohamed_refat
+            "النقشبندي" -> R.raw.adhan_elnakshbandy
+            "الإمام الحسيني" -> R.raw.adhan_elhosary
+            "عبدالباسط عبدالصمد" -> R.raw.adhan_elharm
+            else -> R.raw.adhan_mansour_al_zahrani // الافتراضي
+        }
+
+        try {
+            mediaPlayer?.release()
+            mediaPlayer = MediaPlayer.create(this, soundResId)
+            mediaPlayer?.setVolume(1.0f, 1.0f)
+            mediaPlayer?.start()
+            
+            mediaPlayer?.setOnCompletionListener {
+                mediaPlayer?.release()
+                mediaPlayer = null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun getPrayerName(index: Int): String {        val names = listOf("الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء")
+        return names.getOrElse(index) { "الصلاة" }
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "Prayer Timings",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+        }
+    }
+
+    private fun createNotification(content: String): Notification {
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("مواقيت الصلاة")
+            .setContentText(content)
+            .setSmallIcon(R.drawable.ic_maghrib) // يمكنك تغيير الأيقونة
+            .setOngoing(true)
+            .build()
+    }
+
+    private fun showNotification(content: String) {
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.notify(NOTIFICATION_ID, createNotification(content))
+    }
+
+    private fun runOnUiThread(action: () -> Unit) {
+        android.os.Handler(android.os.Looper.getMainLooper()).post(action)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer?.release()
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+}        if (diff < 0) diff += 24 * 3600
 
         if (diff <= 1 && adhanSound == true && nextIdx != 1) {
           val intent = Intent(this@NextPrayService, AdhanSound::class.java)
