@@ -1,6 +1,7 @@
 package com.example.islamicprayertimings
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var countryText: TextView
     private lateinit var cityText: TextView
     private lateinit var updateBtn: Button
+    private lateinit var settingsButton: Button  // ← زر الإعدادات الجديد
     private lateinit var switch24h: SwitchCompat
     private lateinit var switchSound: SwitchCompat
 
@@ -46,8 +48,8 @@ class MainActivity : AppCompatActivity() {
         R.drawable.ic_maghrib,
         R.drawable.ic_isha
     )
-
-    override fun onCreate(savedInstanceState: Bundle?) {        super.onCreate(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
         initViews()
@@ -69,6 +71,7 @@ class MainActivity : AppCompatActivity() {
         countryText = findViewById(R.id.Country)
         cityText = findViewById(R.id.City)
         updateBtn = findViewById(R.id.button)
+        settingsButton = findViewById(R.id.settingsButton)  // ← تهيئة زر الإعدادات
         switch24h = findViewById(R.id.switch_24hour)
         switchSound = findViewById(R.id.switch_sound)
     }
@@ -87,8 +90,13 @@ class MainActivity : AppCompatActivity() {
             fetchPrayerTimes()
         }
 
-        switch24h.setOnCheckedChangeListener { _, _ ->
-            updatePrayerList()
+        // ← كود زر الإعدادات (بيفتح صفحة الاختيارات)
+        settingsButton.setOnClickListener {
+            val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+            startActivity(intent)
+        }
+
+        switch24h.setOnCheckedChangeListener { _, _ ->            updatePrayerList()
             startNextPrayService()
         }
 
@@ -96,6 +104,7 @@ class MainActivity : AppCompatActivity() {
             startNextPrayService()
         }
     }
+
     private fun checkNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -136,8 +145,7 @@ class MainActivity : AppCompatActivity() {
         convertTimings()
         switch24h.isChecked = prefs.getBoolean("s24", true)
         switchSound.isChecked = prefs.getBoolean("s_sound", false)
-        updatePrayerList()
-    }
+        updatePrayerList()    }
 
     private fun fetchPrayerTimes() {
         val client = okhttp3.OkHttpClient()
@@ -145,7 +153,8 @@ class MainActivity : AppCompatActivity() {
         val country = countryText.text.toString().trim()
         
         val request = okhttp3.Request.Builder()
-            .url("$aladhanAPI&city=$city&country=$country")            .build()
+            .url("$aladhanAPI&city=$city&country=$country")
+            .build()
 
         client.newCall(request).enqueue(object : okhttp3.Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -185,8 +194,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     } catch (e: Exception) {
                         runOnUiThread {
-                            Toast.makeText(this@MainActivity, "خطأ في البيانات", Toast.LENGTH_SHORT).show()
-                            swipeRefreshLayout.isRefreshing = false
+                            Toast.makeText(this@MainActivity, "خطأ في البيانات", Toast.LENGTH_SHORT).show()                            swipeRefreshLayout.isRefreshing = false
                         }
                     }
                 }
@@ -194,6 +202,7 @@ class MainActivity : AppCompatActivity() {
         })
         startNextPrayService()
     }
+
     private fun convertTimings() {
         for (i in 0..5) {
             prayerTimings12[i] = convertTo12HourFormat(prayerTimings24[i])
