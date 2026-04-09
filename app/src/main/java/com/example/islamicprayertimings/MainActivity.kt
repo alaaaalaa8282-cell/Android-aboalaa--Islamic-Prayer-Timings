@@ -16,9 +16,15 @@ import androidx.core.content.edit
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,12 +47,12 @@ class MainActivity : AppCompatActivity() {
     private val prayerNames = listOf("الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء")
     private val prayerIcons = listOf(
         R.drawable.ic_fajr,
-        R.drawable.ic_sunrise,
-        R.drawable.ic_dhuhr,
+        R.drawable.ic_sunrise,        R.drawable.ic_dhuhr,
         R.drawable.ic_asr,
         R.drawable.ic_maghrib,
         R.drawable.ic_isha
     )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
@@ -90,13 +96,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         settingsButton.setOnClickListener {
-            startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
-        }
+            startActivity(Intent(this@MainActivity, SettingsActivity::class.java))        }
 
         switch24h.setOnCheckedChangeListener { _, _ ->
             updatePrayerList()
             startNextPrayService()
         }
+
         switchSound.setOnCheckedChangeListener { _, _ ->
             startNextPrayService()
         }
@@ -139,13 +145,13 @@ class MainActivity : AppCompatActivity() {
             prayerTimings24[i] = prefs.getString("prayer_$i", "").orEmpty()
         }
         
-        convertTimings()
-        switch24h.isChecked = prefs.getBoolean("s24", true)
+        convertTimings()        switch24h.isChecked = prefs.getBoolean("s24", true)
         switchSound.isChecked = prefs.getBoolean("s_sound", false)
         updatePrayerList()
     }
 
-    private fun fetchPrayerTimes() {        val client = OkHttpClient()
+    private fun fetchPrayerTimes() {
+        val client = OkHttpClient()
         val city = cityText.text.toString().trim()
         val country = countryText.text.toString().trim()
         
@@ -188,13 +194,13 @@ class MainActivity : AppCompatActivity() {
                             updatePrayerList()
                             swipeRefreshLayout.isRefreshing = false
                             savePreferences()
-                        }
-                    } catch (e: Exception) {
+                        }                    } catch (e: Exception) {
                         runOnUiThread {
                             Toast.makeText(this@MainActivity, "خطأ في البيانات", Toast.LENGTH_SHORT).show()
                             swipeRefreshLayout.isRefreshing = false
                         }
-                    }                }
+                    }
+                }
             }
         })
         startNextPrayService()
@@ -205,7 +211,6 @@ class MainActivity : AppCompatActivity() {
             prayerTimings12[i] = convertTo12HourFormat(prayerTimings24[i])
             val parts = prayerTimings24[i].split(":")
             if (parts.size >= 2) {
-                // تم تصحيح الأولوية هنا بإضافة الأقواس
                 prayerTimingsInSeconds[i] = ((parts[0].toIntOrNull() ?: 0) * 3600) + ((parts[1].toIntOrNull() ?: 0) * 60)
             }
         }
@@ -214,8 +219,8 @@ class MainActivity : AppCompatActivity() {
     private fun convertTo12HourFormat(time24: String): String {
         if (time24.isBlank()) return ""
         return try {
-            val inputFormat = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
-            val outputFormat = java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault())
+            val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
             val date = inputFormat.parse(time24)
             outputFormat.format(date!!)
         } catch (e: Exception) {
