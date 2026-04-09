@@ -96,7 +96,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         switch24h.setOnCheckedChangeListener { _, _ ->
-            updatePrayerList()            startNextPrayService()
+            updatePrayerList() 
+            startNextPrayService()
         }
 
         switchSound.setOnCheckedChangeListener { _, _ ->
