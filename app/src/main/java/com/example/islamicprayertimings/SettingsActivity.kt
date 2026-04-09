@@ -1,6 +1,5 @@
 package com.example.islamicprayertimings
 
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -10,7 +9,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class SettingsActivity : AppCompatActivity() {
-
     private lateinit var prefs: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,12 +42,9 @@ class SettingsActivity : AppCompatActivity() {
                 prefs.edit().putString("selected_muezzin", selected).apply()
                 Toast.makeText(this@SettingsActivity, "تم اختيار: $selected", Toast.LENGTH_SHORT).show()
             }
-
             override fun onNothingSelected(parent: android.widget.AdapterView<*>) {}
         }
 
-        btnBack.setOnClickListener {
-            finish()
-        }
+        btnBack.setOnClickListener { finish() }
     }
 }
