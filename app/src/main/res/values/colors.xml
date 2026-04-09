@@ -1,10 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- 🎨 الألوان الإسلامية الجديدة -->
+    
+    <!-- الأساسي: أخضر داكن -->
+    <color name="purple_500">#1B5E20</color>
+    <color name="purple_700">#003300</color>
+    
+    <!-- الثانوي: ذهبي -->
+    <color name="teal_200">#FFD700</color>
+    <color name="teal_700">#B8860B</color>
+    
+    <!-- ألوان النصوص والخلفيات -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    
+    <!-- خلفية التطبيق -->
+    <color name="background_light">#F9F9F9</color>
+    <color name="surface_light">#FFFFFF</color>
+    
+    <!-- للنص على الخلفية -->
+    <color name="on_primary">#FFFFFF</color>
+    <color name="on_secondary">#000000</color>
+    
+    <!-- للصلاة الحالية -->
+    <color name="current_prayer">#E8F5E9</color>
 </resources>
