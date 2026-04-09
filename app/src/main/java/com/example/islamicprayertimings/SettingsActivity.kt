@@ -22,9 +22,9 @@ class SettingsActivity : AppCompatActivity() {
         val muezzins = arrayOf(
             "منصور الزهراني",
             "محمد رفعت",
-            "الإمام الحسيني",
+            "الحصري",
             "النقشبندي",
-            "عبدالباسط عبدالصمد"
+            "الحرم"
         )
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, muezzins)
