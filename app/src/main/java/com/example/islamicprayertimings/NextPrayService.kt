@@ -3,14 +3,13 @@ package com.example.islamicprayertimings
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.os.Build
-import android.os.IBinder
 import android.os.Handler
+import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.NotificationCompat
 import java.util.Calendar
@@ -40,14 +39,20 @@ class NextPrayService : Service() {
             isSoundEnabled = intent.getBooleanExtra("adhanSound", true)
         }
 
-        val notification = createNotification("جاري التحديث...")
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("مواقيت الصلاة")
+            .setContentText("جاري التحديث...")
+            .setSmallIcon(R.drawable.ic_maghrib)
+            .setOngoing(true)
+            .build()
+            
         startForeground(NOTIFICATION_ID, notification)
         startTimer()
-
         return START_STICKY
     }
 
-    private fun startTimer() {        timer("PrayerTimer", false, 0, 1000) {
+    private fun startTimer() {
+        timer("PrayerTimer", false, 0, 1000) {
             val now = Calendar.getInstance()
             val currentSeconds = now.get(Calendar.HOUR_OF_DAY) * 3600 + 
                                  now.get(Calendar.MINUTE) * 60 + 
@@ -73,9 +78,9 @@ class NextPrayService : Service() {
         val soundResId = when (selectedMuezzin) {
             "محمد رفعت" -> R.raw.adhan_mohamed_refat
             "النقشبندي" -> R.raw.adhan_elnakshbandy
-            "الإمام الحسيني" -> R.raw.adhan_elhosary
-            "عبدالباسط عبدالصمد" -> R.raw.adhan_elharm
-            else -> R.raw.adhan_mansour_al_zahrani
+            "الحصري" -> R.raw.adhan_elhosary
+            "الحرم" -> R.raw.adhan_elharm
+            else -> R.raw.adhan_mansour_al_zahrani // منصور الزهراني (الافتراضي)
         }
 
         try {
@@ -92,11 +97,11 @@ class NextPrayService : Service() {
             e.printStackTrace()
         }
     }
-
     private fun getPrayerName(index: Int): String {
         val names = listOf("الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء")
         return names.getOrElse(index) { "الصلاة" }
     }
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -108,18 +113,15 @@ class NextPrayService : Service() {
         }
     }
 
-    private fun createNotification(content: String): Notification {
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+    private fun showNotification(content: String) {
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("مواقيت الصلاة")
             .setContentText(content)
             .setSmallIcon(R.drawable.ic_maghrib)
             .setOngoing(true)
             .build()
-    }
-
-    private fun showNotification(content: String) {
+            
         val manager = getSystemService(NotificationManager::class.java)
-        val notification = createNotification(content)
         manager.notify(NOTIFICATION_ID, notification)
     }
 
