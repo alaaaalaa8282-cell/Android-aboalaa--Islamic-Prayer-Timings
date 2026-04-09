@@ -1,27 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 🎨 الألوان الإسلامية الجديدة -->
-    
-    <!-- الأساسي: أخضر داكن -->
+    <!-- 🎨 الألوان القديمة (عشان الـ build ما يقعش) -->
+    <color name="purple_200">#81C784</color>
     <color name="purple_500">#1B5E20</color>
     <color name="purple_700">#003300</color>
-    
-    <!-- الثانوي: ذهبي -->
     <color name="teal_200">#FFD700</color>
     <color name="teal_700">#B8860B</color>
     
-    <!-- ألوان النصوص والخلفيات -->
+    <!-- ألوان النظام -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     
-    <!-- خلفية التطبيق -->
+    <!-- ألوان إضافية -->
     <color name="background_light">#F9F9F9</color>
     <color name="surface_light">#FFFFFF</color>
-    
-    <!-- للنص على الخلفية -->
     <color name="on_primary">#FFFFFF</color>
     <color name="on_secondary">#000000</color>
-    
-    <!-- للصلاة الحالية -->
     <color name="current_prayer">#E8F5E9</color>
 </resources>
