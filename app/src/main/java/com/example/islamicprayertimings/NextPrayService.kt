@@ -1,13 +1,19 @@
 package com.example.islamicprayertimings
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Intent
 import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
+import android.os.Handler
+import android.os.Looper
 import androidx.core.app.NotificationCompat
-import java.util.*
+import java.util.Calendar
 import kotlin.concurrent.timer
 
 class NextPrayService : Service() {
@@ -34,21 +40,22 @@ class NextPrayService : Service() {
             isSoundEnabled = intent.getBooleanExtra("adhanSound", true)
         }
 
-        startForeground(NOTIFICATION_ID, createNotification("جاري التحديث..."))
+        val notification = createNotification("جاري التحديث...")
+        startForeground(NOTIFICATION_ID, notification)
         startTimer()
 
         return START_STICKY
     }
 
-    private fun startTimer() {
-        timer("PrayerTimer", false, 0, 1000) {
+    private fun startTimer() {        timer("PrayerTimer", false, 0, 1000) {
             val now = Calendar.getInstance()
             val currentSeconds = now.get(Calendar.HOUR_OF_DAY) * 3600 + 
                                  now.get(Calendar.MINUTE) * 60 + 
                                  now.get(Calendar.SECOND)
 
-            for (i in 0 until prayerTimingsInSeconds.size) {                if (currentSeconds == prayerTimingsInSeconds[i]) {
-                    android.os.Handler(android.os.Looper.getMainLooper()).post {
+            for (i in 0 until prayerTimingsInSeconds.size) {
+                if (currentSeconds == prayerTimingsInSeconds[i]) {
+                    Handler(Looper.getMainLooper()).post {
                         val prayerName = getPrayerName(i)
                         showNotification("$prayerName الآن")
                         playAdhanSound()
@@ -90,13 +97,13 @@ class NextPrayService : Service() {
         val names = listOf("الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء")
         return names.getOrElse(index) { "الصلاة" }
     }
-
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 "Prayer Timings",
-                NotificationManager.IMPORTANCE_DEFAULT            )
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
     }
@@ -112,7 +119,8 @@ class NextPrayService : Service() {
 
     private fun showNotification(content: String) {
         val manager = getSystemService(NotificationManager::class.java)
-        manager.notify(NOTIFICATION_ID, createNotification(content))
+        val notification = createNotification(content)
+        manager.notify(NOTIFICATION_ID, notification)
     }
 
     override fun onDestroy() {
