@@ -224,7 +224,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ الدالة دي مهمة جداً - متحذفهاش!
     private fun startNextPrayService() {
         if (prayerTimings24[0].isNotBlank()) {
             val intent = Intent(this, NextPrayService::class.java).apply {
