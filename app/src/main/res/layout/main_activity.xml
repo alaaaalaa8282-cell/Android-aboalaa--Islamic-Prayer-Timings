@@ -82,7 +82,6 @@
                     android:text="تحديث"
                     android:layout_marginBottom="12dp" />
 
-                <!-- زر الإعدادات (جديد) -->
                 <Button
                     android:id="@+id/settingsButton"
                     android:layout_width="match_parent"
@@ -96,8 +95,8 @@
                     android:orientation="horizontal">
 
                     <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switch_24hour"                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:id="@+id/switch_24hour"
+                        android:layout_width="0dp"                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="نظام 24 ساعة" />
 
@@ -112,11 +111,6 @@
 
             </LinearLayout>
 
-        </LinearLayout>
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
         </LinearLayout>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
