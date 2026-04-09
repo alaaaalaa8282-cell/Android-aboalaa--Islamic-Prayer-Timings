@@ -80,7 +80,7 @@ class NextPrayService : Service() {
             "النقشبندي" -> R.raw.adhan_elnakshbandy
             "الحصري" -> R.raw.adhan_elhosary
             "الحرم" -> R.raw.adhan_elharm
-            else -> R.raw.adhan_mansour_al_zahrani // منصور الزهراني (الافتراضي)
+            else -> R.raw.adhan_mansour_al_zahrani
         }
 
         try {
