@@ -1,6 +1,5 @@
 name: Build & Release APK
 
-# التشغيل يتم عند الضغط يدوي أو عند عمل Push
 on:
   workflow_dispatch:
   push:
@@ -21,20 +20,36 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # 3. بناء التطبيق
+    # 3. بناء التطبيق (unsigned APK)
     - name: Build with Gradle
       run: |
         chmod +x ./gradlew
         ./gradlew :app:assembleRelease
 
-    # 4. إنشاء Release ورفع الملف تلقائياً
+    # 4. توقيع الـ APK (الحل السحري)
+    - name: Sign APK
+      run: |
+        # توليد مفتاح توقيع مؤقت (debug keystore)
+        keytool -genkey -v -keystore debug.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
+          -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, ST=Debug, C=Debug" -storepass android -keypass android
+        
+        # تثبيت أداة apksigner
+        sudo apt-get update
+        sudo apt-get install -y apksigner
+        
+        # توقيع الـ APK
+        apksigner sign --ks debug.keystore --ks-pass pass:android \
+          --out app/build/outputs/apk/release/app-release-signed.apk \
+          app/build/outputs/apk/release/app-release-unsigned.apk
+
+    # 5. إنشاء Release ورفع الملف الموقع
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: app/build/outputs/apk/release/*.apk
+        files: app/build/outputs/apk/release/app-release-signed.apk
         name: "الإصدار الجديد - ${{ github.run_number }}"
         tag_name: "v1.2.${{ github.run_number }}"
-        body: "تم بناء هذا الإصدار تلقائياً من الكود المحدث."
+        body: "تم بناء هذا الإصدار تلقائياً من الكود المحدث. (نسخة موقعة)"
         draft: false
         prerelease: false
       env:
