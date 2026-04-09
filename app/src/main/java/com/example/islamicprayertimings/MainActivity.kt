@@ -84,7 +84,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        swipeRefreshLayout.setOnRefreshListener { fetchPrayerTimes() }
+        swipeRefreshLayout.setOnRefreshListener { 
+            fetchPrayerTimes()
+        }
         
         updateBtn.setOnClickListener {
             swipeRefreshLayout.isRefreshing = true
@@ -92,11 +94,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         settingsButton.setOnClickListener {
-            startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
+            val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+            startActivity(intent)
         }
-
         switch24h.setOnCheckedChangeListener { _, _ ->
-            updatePrayerList()            startNextPrayService()
+            updatePrayerList()
+            startNextPrayService()
         }
 
         switchSound.setOnCheckedChangeListener { _, _ ->
@@ -142,10 +145,10 @@ class MainActivity : AppCompatActivity() {
         }
         
         convertTimings()
-        switch24h.isChecked = prefs.getBoolean("s24", true)
-        switchSound.isChecked = prefs.getBoolean("s_sound", false)
+        switch24h.isChecked = prefs.getBoolean("s24", true)        switchSound.isChecked = prefs.getBoolean("s_sound", false)
         updatePrayerList()
     }
+
     private fun fetchPrayerTimes() {
         val client = OkHttpClient()
         val city = cityText.text.toString().trim()
@@ -191,10 +194,10 @@ class MainActivity : AppCompatActivity() {
                             swipeRefreshLayout.isRefreshing = false
                             savePreferences()
                         }
-                    } catch (e: Exception) {
-                        runOnUiThread {
+                    } catch (e: Exception) {                        runOnUiThread {
                             Toast.makeText(this@MainActivity, "خطأ في البيانات", Toast.LENGTH_SHORT).show()
-                            swipeRefreshLayout.isRefreshing = false                        }
+                            swipeRefreshLayout.isRefreshing = false
+                        }
                     }
                 }
             }
