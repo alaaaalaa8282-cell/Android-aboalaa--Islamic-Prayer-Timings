@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 🎨 الألوان القديمة (عشان الـ build ما يقعش) -->
+    <!-- 🎨 الألوان الأساسية (أخضر وذهبي) -->
     <color name="purple_200">#81C784</color>
     <color name="purple_500">#1B5E20</color>
     <color name="purple_700">#003300</color>
@@ -11,10 +11,15 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     
-    <!-- ألوان إضافية -->
+    <!-- ألوان الخلفيات والبطاقات -->
     <color name="background_light">#F9F9F9</color>
     <color name="surface_light">#FFFFFF</color>
+    <color name="current_prayer">#E8F5E9</color>
+    <color name="divider">#E0E0E0</color>
+    
+    <!-- ألوان النصوص (اللي كنا نسيناهم!) 👇 -->
+    <color name="text_primary">#212121</color>   <!-- أسود للنص الأساسي -->
+    <color name="text_secondary">#757575</color> <!-- رمادي للنص الثانوي -->
     <color name="on_primary">#FFFFFF</color>
     <color name="on_secondary">#000000</color>
-    <color name="current_prayer">#E8F5E9</color>
 </resources>
