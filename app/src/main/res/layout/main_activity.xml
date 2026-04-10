@@ -38,7 +38,7 @@
                 android:orientation="horizontal"
                 android:layout_marginBottom="16dp">
 
-                <TextView
+                <EditText
                     android:id="@+id/Country"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -47,7 +47,7 @@
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary" />
-                                    <TextView
+                                    <EditText
                     android:id="@+id/City"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
