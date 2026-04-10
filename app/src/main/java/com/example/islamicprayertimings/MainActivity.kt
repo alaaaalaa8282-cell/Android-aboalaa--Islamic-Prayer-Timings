@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("prefs", MODE_PRIVATE)
         prefs.edit {
             putString("country", countryText.text?.toString()?.trim() ?: "")
-            putString("city", cityText.text.toString().trim())
+            putString("city", cityText.text.toString()?.trim() ?: "")
             for (i in 0..5) putString("prayer_$i", prayerTimings24[i])
             putBoolean("s24", switch24h.isChecked)
             putBoolean("s_sound", switchSound.isChecked)
@@ -135,8 +135,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadPreferences() {
         val prefs = getSharedPreferences("prefs", MODE_PRIVATE)
-        countryText.text = prefs.getString("country", "Egypt")
-        cityText.text = prefs.getString("city", "Cairo")
+        countryText.text = prefs.getString("country", "Egypt"))
+        cityText.text = prefs.getString("city", "Cairo")) 
         
         for (i in 0..5) {
             prayerTimings24[i] = prefs.getString("prayer_$i", "").orEmpty()
