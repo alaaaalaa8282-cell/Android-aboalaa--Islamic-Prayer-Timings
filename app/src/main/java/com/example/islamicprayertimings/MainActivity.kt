@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity() {
     private fun savePreferences() {
         val prefs = getSharedPreferences("prefs", MODE_PRIVATE)
         prefs.edit {
-            putString("country", countryText.text.toString().trim())
+            putString("country", countryText.text?.toString()?.trim() ?: "")
             putString("city", cityText.text.toString().trim())
             for (i in 0..5) putString("prayer_$i", prayerTimings24[i])
             putBoolean("s24", switch24h.isChecked)
