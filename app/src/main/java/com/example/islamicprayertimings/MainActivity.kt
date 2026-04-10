@@ -135,8 +135,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadPreferences() {
         val prefs = getSharedPreferences("prefs", MODE_PRIVATE)
-        countryText.setText = prefs.getString("country", "Egypt"))
-        cityText.setText = prefs.getString("city", "Cairo")) 
+        countryText.setText(prefs.getString("country", "Egypt"))
+        cityText.setText(prefs.getString("city", "Cairo"))
         
         for (i in 0..5) {
             prayerTimings24[i] = prefs.getString("prayer_$i", "").orEmpty()
