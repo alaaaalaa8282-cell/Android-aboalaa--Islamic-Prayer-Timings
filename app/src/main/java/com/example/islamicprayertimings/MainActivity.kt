@@ -29,8 +29,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var prayersRecyclerView: RecyclerView
     private lateinit var prayerAdapter: PrayerAdapter
-    private lateinit var countryText: TextView
-    private lateinit var cityText: TextView
+    private lateinit var countryText: EditText
+    private lateinit var cityText: EditText
     private lateinit var updateBtn: Button
     private lateinit var settingsButton: Button
     private lateinit var switch24h: SwitchCompat
